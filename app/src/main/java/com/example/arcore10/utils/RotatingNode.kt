@@ -1,4 +1,4 @@
-package com.example.arcore10
+package com.example.arcore10.utils
 
 import android.animation.ObjectAnimator
 import android.view.animation.LinearInterpolator

@@ -1,4 +1,4 @@
-package com.example.arcore10
+package com.example.arcore10.utils
 
 import android.app.Activity
 import android.content.ContentValues
