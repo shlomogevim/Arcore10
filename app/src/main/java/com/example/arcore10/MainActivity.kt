@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error creating node: $it", Toast.LENGTH_LONG).show()
                 null
             }
-
     }
 
     private fun updateNodes() {
@@ -86,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         }
         arFragment.arSceneView.scene.addChild(anchorNode)
         nodes.add(rotatingNode)
-        val animationData = modelRenderable.getAnimationData("Betta_Splendens")
+        val animationData = modelRenderable.getAnimationData("Beedrill_Animation")
         ModelAnimator(animationData, modelRenderable).apply {
             repeatCount = ModelAnimator.INFINITE
             start()
