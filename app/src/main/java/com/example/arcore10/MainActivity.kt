@@ -21,9 +21,16 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val spaceship = Models.Bee
-    private var modelResourceId = R.raw.beedrill
-    lateinit var util: Util
+    val selector = 2
+
+
+
+    lateinit var spaceship: Models
+    var modelResourceId = 1
+    var animationSring = ""
+
+
+    private lateinit var util: Util
     private val nodes = mutableListOf<RotatingNode>()
     private lateinit var arFragment: ArFragment
     private var curCameraPosition = Vector3.zero()
@@ -32,8 +39,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSelector()
         arFragment = fragment1 as ArFragment
-        util = Util(this,arFragment)
+        util = Util(this, arFragment)
 
         arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
             loadModelAndAddToScene(hitResult.createAnchor(), modelResourceId)
@@ -41,8 +49,26 @@ class MainActivity : AppCompatActivity() {
         arFragment.arSceneView.scene.addOnUpdateListener {
             updateNodes()
         }
-       util.setupFab()
+        util.activateButtom()
     }
+
+    private fun setSelector() {
+        when (selector) {
+            1 -> {
+                spaceship = Models.Bee
+                modelResourceId = R.raw.beedrill
+                animationSring = "Beedrill_Animation"
+            }
+            2->{
+                    spaceship = Models.Dance
+                   modelResourceId = R.raw.biomutantdance_motionplus0
+               // animationSring = "biomutantdance_motionplus0"
+                animationSring = "motionplus0"
+            }
+        }
+
+    }
+
 
     private fun loadModelAndAddToScene(anchor: Anchor, modelResourceId: Int) {
         ModelRenderable.builder()
@@ -50,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             .build()
             .thenAccept { modelRenderable ->
                 addNodeToScene(anchor, modelRenderable, spaceship)
-                util.eliminateDot()
+                //util.eliminateDot()
             }.exceptionally {
                 Toast.makeText(this, "Error creating node: $it", Toast.LENGTH_LONG).show()
                 null
@@ -83,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         }
         arFragment.arSceneView.scene.addChild(anchorNode)
         nodes.add(rotatingNode)
-        val animationData = modelRenderable.getAnimationData("Beedrill_Animation")
+        val animationData = modelRenderable.getAnimationData(animationSring)
         ModelAnimator(animationData, modelRenderable).apply {
             repeatCount = ModelAnimator.INFINITE
             start()

@@ -3,6 +3,8 @@ package com.example.arcore10.utils
 import android.app.Activity
 import android.content.Context
 import android.media.CamcorderProfile
+import android.view.KeyEvent.ACTION_DOWN
+import android.view.KeyEvent.ACTION_UP
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
@@ -27,7 +29,10 @@ class Util(val context: Context,val arFragment: ArFragment) {
         arFragment.planeDiscoveryController.setInstructionView(null)
     }
 
-    fun setupFab() {
+
+
+
+    fun activateButtom() {
         photoSaver = PhotoSaver(activity)
         videoRecorder = VideoRecorder(activity).apply {
             sceneView = arFragment.arSceneView
@@ -36,11 +41,12 @@ class Util(val context: Context,val arFragment: ArFragment) {
                 activity.resources.configuration.orientation
             )
         }
-        activity.btn5.setOnClickListener {
+
+       /* activity.btn5.setOnClickListener {
             if (!isRecording) {
                 photoSaver.takePhoto(arFragment.arSceneView)
             }
-        }
+        }*/
 
         activity.btn5.setOnLongClickListener {
             isRecording = videoRecorder.toggleRecordingState()
@@ -53,6 +59,9 @@ class Util(val context: Context,val arFragment: ArFragment) {
                 Toast.makeText(context, "Saved video to gallery!", Toast.LENGTH_LONG).show()
                 true
             } else false
+        }
+        activity.btn4.setOnClickListener {
+            eliminateDot()
         }
     }
 
