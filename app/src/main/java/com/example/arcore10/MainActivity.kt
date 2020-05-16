@@ -1,37 +1,39 @@
 package com.example.arcore10
 
-import android.media.CamcorderProfile
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.MotionEvent
+import android.widget.Button
 import android.widget.Toast
-import com.example.arcore10.utils.PhotoSaver
 import com.example.arcore10.utils.RotatingNode
 import com.example.arcore10.utils.Util
-import com.example.arcore10.utils.VideoRecorder
 import com.google.ar.core.Anchor
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.animation.ModelAnimator
+import com.google.ar.sceneform.collision.Box
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
+import com.google.ar.sceneform.rendering.ViewRenderable
 import com.google.ar.sceneform.ux.ArFragment
+import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.CompletableFuture
 
 class MainActivity : AppCompatActivity() {
+    //earth_ball selector = 3   onePlaceNode=true
 
-    val selector = 2
-
-
+    val selector = 3
+    val onePlaceNode=true
 
     lateinit var spaceship: Models
     var modelResourceId = 1
     var animationSring = ""
 
-
     private lateinit var util: Util
     private val nodes = mutableListOf<RotatingNode>()
+    private val viewNodes= mutableListOf<Node>()
     private lateinit var arFragment: ArFragment
     private var curCameraPosition = Vector3.zero()
 
@@ -44,7 +46,17 @@ class MainActivity : AppCompatActivity() {
         util = Util(this, arFragment)
 
         arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
-            loadModelAndAddToScene(hitResult.createAnchor(), modelResourceId)
+            if (onePlaceNode){
+               arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
+                   loadModel { modelRenderable, viewRenderable ->
+                       addNodeToScence(hitResult.createAnchor(),modelRenderable,viewRenderable)
+                   }
+               }
+
+            }else{
+                loadModelAndAddToSceneRound(hitResult.createAnchor(), modelResourceId)
+            }
+
         }
         arFragment.arSceneView.scene.addOnUpdateListener {
             updateNodes()
@@ -65,17 +77,81 @@ class MainActivity : AppCompatActivity() {
                // animationSring = "biomutantdance_motionplus0"
                 animationSring = "motionplus0"
             }
+            3->{
+                modelResourceId = R.raw.earth_ball
+                // animationSring = "biomutantdance_motionplus0"
+            }
         }
 
     }
+    private fun loadModel(callback: (ModelRenderable, ViewRenderable) -> Unit) {
+        val modelRenderable = ModelRenderable.builder()
+            .setSource(this, modelResourceId)
+            .build()
+        val viewRenderable = ViewRenderable.builder()
+            .setView(this, createDeleteButton())
+            .build()
+        CompletableFuture.allOf(modelRenderable, viewRenderable)
+            .thenAccept {
+                callback(modelRenderable.get(), viewRenderable.get())
+            }
+            .exceptionally {
+                Toast.makeText(this, "Error", Toast.LENGTH_LONG).show()
+                null
+            }
+    }
+    private fun createDeleteButton(): Button {  //  you can creat any view even entire layout
+        return Button(this).apply {
+            text = "  עולם קטן מיועד למחשבות קטנות  "
+            setBackgroundColor(Color.RED)
+            setTextColor(Color.WHITE)
+        }
+    }
+
+    private fun addNodeToScence(
+        anchor: Anchor,
+        modelRenderable: ModelRenderable,
+        viewRenderable: ViewRenderable
+    ) {
+        val anchorNode = AnchorNode(anchor)
+        val modelNode = TransformableNode(arFragment.transformationSystem).apply {
+            renderable = modelRenderable
+            setParent(anchorNode)
+            getCurrentScene().addChild(anchorNode)
+            select()
+        }
+        val viewNode = Node().apply {
+            renderable = null // not seen at first
+            setParent(modelNode)
+            val box = modelNode.renderable?.collisionShape as Box
+            localPosition = Vector3(0f, box.size.y, 0f)  //x,y,z
+            (viewRenderable.view as Button).setOnClickListener {   // fine definition to buttom id
+                getCurrentScene().removeChild(anchorNode)           // remove the model amd the view
+                viewNodes.remove(this)
+            }
+        }
+        viewNodes.add(viewNode)
+        modelNode.setOnTapListener { _, _ ->
+            if (!modelNode.isTransforming) {  // if the model is not movving
+                if (viewNode.renderable == null) {
+                    viewNode.renderable = viewRenderable
+                } else {
+                    viewNode.renderable = null
+                }
+
+            }
+
+        }
+    }
+    private fun getCurrentScene() = arFragment.arSceneView.scene
 
 
-    private fun loadModelAndAddToScene(anchor: Anchor, modelResourceId: Int) {
+    private fun loadModelAndAddToSceneRound(anchor: Anchor, modelResourceId: Int) {
         ModelRenderable.builder()
             .setSource(this, modelResourceId)
             .build()
             .thenAccept { modelRenderable ->
-                addNodeToScene(anchor, modelRenderable, spaceship)
+                addNodeToSceneRound(anchor, modelRenderable, spaceship)
                 //util.eliminateDot()
             }.exceptionally {
                 Toast.makeText(this, "Error creating node: $it", Toast.LENGTH_LONG).show()
@@ -91,7 +167,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun addNodeToScene(
+    private fun addNodeToSceneRound(
         anchor: Anchor,
         modelRenderable: ModelRenderable,
         spaceship: Models

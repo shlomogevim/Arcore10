@@ -10,7 +10,14 @@ sceneform.asset(
         'src/main/res/raw/beedrill',
         ['sampledata/models/Beedrill_Animation.fbx']
 )
+
 sceneform.asset(
+        'sampledata/models/earth/earth_ball.obj',
+        'default',
+        'sampledata/models/earth/earth_ball.sfa',
+        'src/main/res/raw/earth_ball'
+)
+/*sceneform.asset(
         'sampledata/models1/Fishka_2.fbx',
         'default',
         'sampledata/models1/Fishka_2.sfa',
@@ -23,7 +30,11 @@ sceneform.asset(
         'sampledata/models2/biomutantdance_motionplus0.sfa',
         'src/main/res/raw/biomutantdance_motionplus0',
         ['sampledata/models2/biomutantdance_motionplus0.fbx']
-)
+)*/
+
+
+
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
