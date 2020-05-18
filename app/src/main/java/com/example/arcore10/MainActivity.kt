@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     val selector = 2
     val onePlaceNode = true
-    var fireBaseSource=false
+    var fireBaseSource = false
     var maxModelScale = 0.07f
     var minModelScale = 0.06f
 
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var model: Models
     var modelResourceId = 1
     var animationSring = ""
-    var url=""
+    var url = ""
 
     private lateinit var util: Util
     private val nodes = mutableListOf<RotatingNode>()
@@ -55,20 +55,20 @@ class MainActivity : AppCompatActivity() {
         setSelector()
         arFragment = fragment1 as ArFragment
         util = Util(this, arFragment)
-
-        arFragment.setOnTapArPlaneListener { hitResult, _,_ ->
-            spawnObject(hitResult.createAnchor(), Uri.parse(url))
-
+        if (fireBaseSource) {
+            fireBaseActivale()
+        } else {
+            sampledataActivate()
         }
+        util.activateButtom()
+    }
 
-      /*  arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
+    private fun sampledataActivate() {
+        arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
             if (onePlaceNode) {
-                // arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
                 loadModel { modelRenderable, viewRenderable ->
                     addNodeToScence(hitResult.createAnchor(), modelRenderable, viewRenderable)
                 }
-                // }
-
             } else {
                 loadModelAndAddToSceneRound(hitResult.createAnchor(), modelResourceId)
             }
@@ -77,7 +77,12 @@ class MainActivity : AppCompatActivity() {
         arFragment.arSceneView.scene.addOnUpdateListener {
             updateNodes()
         }
-        util.activateButtom()*/
+    }
+
+    private fun fireBaseActivale() {
+        arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
+            spawnObject(hitResult.createAnchor(), Uri.parse(url))
+        }
     }
 
     private fun setSelector() {
@@ -87,10 +92,11 @@ class MainActivity : AppCompatActivity() {
                 modelResourceId = R.raw.beedrill
                 animationSring = "Beedrill_Animation"
             }
-            2->{
-                model=Models.Fish
-                url = "https://firebasestorage.googleapis.com/v0/b/thermal-proton-239415.appspot.com/o/golde_fish.glb?alt=media&token=04c99487-dea7-48a0-96f5-05a2f1fed3d5"
-
+            2 -> {
+                model = Models.Fish
+                url =
+                    "https://firebasestorage.googleapis.com/v0/b/thermal-proton-239415.appspot.com/o/golde_fish.glb?alt=media&token=04c99487-dea7-48a0-96f5-05a2f1fed3d5"
+                fireBaseSource=true
             }
             3 -> modelResourceId = R.raw.earth_ball
             4 -> {
@@ -104,86 +110,34 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    private fun spawnObject(anchor: Anchor,modelUri:Uri){
-        val rendrebaleSource= RenderableSource.builder()
-            .setSource(this,modelUri, RenderableSource.SourceType.GLB)
+
+    private fun spawnObject(anchor: Anchor, modelUri: Uri) {
+        val rendrebaleSource = RenderableSource.builder()
+            .setSource(this, modelUri, RenderableSource.SourceType.GLB)
             .setScale(0.01f)
             .setRecenterMode(RenderableSource.RecenterMode.ROOT)
             .build()
         ModelRenderable.builder()
-            .setSource(this,rendrebaleSource)
+            .setSource(this, rendrebaleSource)
             .setRegistryId(modelUri)
             .build()
             .thenAccept {
-                addNodeToScene(anchor,it)
+                addNodeToScene(anchor, it)
             }.exceptionally {
-                Log.e("clima","Somthing go wrong in loading model")
+                Log.e("clima", "Somthing go wrong in loading model")
                 null
             }
     }
-    private fun addNodeToScene(anchor: Anchor,modelRenderable: ModelRenderable){
-        val anchorNode=AnchorNode(anchor)
+
+    private fun addNodeToScene(anchor: Anchor, modelRenderable: ModelRenderable) {
+        val anchorNode = AnchorNode(anchor)
         TransformableNode(arFragment.transformationSystem).apply {
-            renderable=modelRenderable
+            renderable = modelRenderable
             setParent(anchorNode)
         }
         arFragment.arSceneView.scene.addChild(anchorNode)
     }
 
-    /*
-    *  override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        arFragment = fragment as ArFragment
-        arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
-            spawnObject(hitResult.createAnchor(), Uri.parse(url))
-
-        }
-        arFragment.arSceneView.scene.addOnUpdateListener {
-            updateNodes()
-        }
-    }
-
-    private fun spawnObject(anchor: Anchor, modelUri: Uri) {
-          val rendrebaleSource = RenderableSource.builder()
-              .setSource(this, modelUri, RenderableSource.SourceType.GLB)
-              .setScale(0.002f)
-              // .setScale(0.002f)
-              .setRecenterMode(RenderableSource.RecenterMode.ROOT)
-              .build()
-          ModelRenderable.builder()
-              .setSource(this, rendrebaleSource)
-              .setRegistryId(modelUri)
-              .build()
-              .thenAccept {
-                  addNotesToScene1(anchor, it)
-              }.exceptionally {
-                  Log.e("clima", "Somthing go wrong in loading model")
-                  null
-              }
-      }
-
-
-      private fun addNotesToScene1(anchor: Anchor, modelRenderable: ModelRenderable) {
-          val anchorNode = AnchorNode(anchor)
-          val rotatingNode = RotatingNode(model.degreesPerSecond).apply {
-              setParent(anchorNode)
-          }
-          Node().apply {
-              renderable = modelRenderable
-              setParent(rotatingNode)
-            //  localPosition = Vector3(model.radius, model.height, 0f)
-             // localRotation = Quaternion.eulerAngles(Vector3(0f, model.rotationDegrees, 0f))
-              arFragment.arSceneView.scene.addChild(anchorNode)
-              nodes.add(rotatingNode)
-              val animateData = modelRenderable.getAnimationData("Beedrill_Animation")
-              ModelAnimator(animateData, modelRenderable).apply {
-                  repeatCount = ModelAnimator.INFINITE
-                  start()
-              }
-
-          }
-      }*/
 
     private fun loadModel(callback: (ModelRenderable, ViewRenderable) -> Unit) {
         val modelRenderable = ModelRenderable.builder()
