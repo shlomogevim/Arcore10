@@ -3,6 +3,7 @@ package com.example.arcore10
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import com.example.arcore10.utils.RotatingNode
@@ -22,18 +23,21 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.CompletableFuture
 
 class MainActivity : AppCompatActivity() {
+    //bee_drill selector = 1   onePlaceNode=false
+    //shiny-fish selector = 2  onePlaceNode=false  not working
     //earth_ball selector = 3   onePlaceNode=true
+    //dancer selector = 4   onePlaceNode=true
 
-    val selector = 3
-    val onePlaceNode=true
+    val selector = 4
+    val onePlaceNode = true
 
-    lateinit var spaceship: Models
+    lateinit var model: Models
     var modelResourceId = 1
     var animationSring = ""
 
     private lateinit var util: Util
     private val nodes = mutableListOf<RotatingNode>()
-    private val viewNodes= mutableListOf<Node>()
+    private val viewNodes = mutableListOf<Node>()
     private lateinit var arFragment: ArFragment
     private var curCameraPosition = Vector3.zero()
 
@@ -46,14 +50,14 @@ class MainActivity : AppCompatActivity() {
         util = Util(this, arFragment)
 
         arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
-            if (onePlaceNode){
-               arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
-                   loadModel { modelRenderable, viewRenderable ->
-                       addNodeToScence(hitResult.createAnchor(),modelRenderable,viewRenderable)
-                   }
-               }
+            if (onePlaceNode) {
+               // arFragment.setOnTapArPlaneListener { hitResult, _, _ ->
+                    loadModel { modelRenderable, viewRenderable ->
+                        addNodeToScence(hitResult.createAnchor(), modelRenderable, viewRenderable)
+                    }
+               // }
 
-            }else{
+            } else {
                 loadModelAndAddToSceneRound(hitResult.createAnchor(), modelResourceId)
             }
 
@@ -61,29 +65,27 @@ class MainActivity : AppCompatActivity() {
         arFragment.arSceneView.scene.addOnUpdateListener {
             updateNodes()
         }
-        util.activateButtom()
+             util.activateButtom()
     }
 
     private fun setSelector() {
         when (selector) {
-            1 -> {
-                spaceship = Models.Bee
+            1 -> { model = Models.Bee
                 modelResourceId = R.raw.beedrill
-                animationSring = "Beedrill_Animation"
-            }
-            2->{
-                    spaceship = Models.Dance
-                   modelResourceId = R.raw.biomutantdance_motionplus0
-               // animationSring = "biomutantdance_motionplus0"
-                animationSring = "motionplus0"
-            }
-            3->{
-                modelResourceId = R.raw.earth_ball
-                // animationSring = "biomutantdance_motionplus0"
-            }
+                animationSring = "Beedrill_Animation"}
+            2 -> {   // not working soory
+                model = Models.Fishka
+                modelResourceId = R.raw.fishka
+                animationSring = " Fishka_2" }
+            3 ->  modelResourceId = R.raw.earth_ball
+            4->{ model = Models.Dance
+                 modelResourceId = R.raw.biomutantdance_motionplus0
+                 animationSring = "motionplus0" }
+
         }
 
     }
+
     private fun loadModel(callback: (ModelRenderable, ViewRenderable) -> Unit) {
         val modelRenderable = ModelRenderable.builder()
             .setSource(this, modelResourceId)
@@ -100,9 +102,10 @@ class MainActivity : AppCompatActivity() {
                 null
             }
     }
+
     private fun createDeleteButton(): Button {  //  you can creat any view even entire layout
         return Button(this).apply {
-            text = "  עולם קטן מיועד למחשבות קטנות  "
+            text = "  סתם הודעה  "
             setBackgroundColor(Color.RED)
             setTextColor(Color.WHITE)
         }
@@ -116,10 +119,21 @@ class MainActivity : AppCompatActivity() {
         val anchorNode = AnchorNode(anchor)
         val modelNode = TransformableNode(arFragment.transformationSystem).apply {
             renderable = modelRenderable
+            scaleController.maxScale=0.07f
+            scaleController.minScale=0.06f
+
+
+
+
             setParent(anchorNode)
             getCurrentScene().addChild(anchorNode)
-            select()
+
+                 // select()
+            startAnimation(renderable as ModelRenderable)
         }
+
+
+
         val viewNode = Node().apply {
             renderable = null // not seen at first
             setParent(modelNode)
@@ -138,11 +152,27 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     viewNode.renderable = null
                 }
-
             }
-
         }
     }
+
+    private fun startAnimation(renderable: ModelRenderable) {
+        if (renderable.animationDataCount==0){
+            return
+        }
+        val box=renderable.collisionShape as Box
+        var x=box.size.x
+        var y=box.size.y
+        var z=box.size.z
+        Log.i("clima","x=$x  y=$y  z=$z")
+        val animationData=renderable.getAnimationData(animationSring)
+        ModelAnimator(animationData,renderable).apply {
+            repeatCount=ModelAnimator.INFINITE
+            start()
+        }
+
+    }
+
     private fun getCurrentScene() = arFragment.arSceneView.scene
 
 
@@ -151,7 +181,7 @@ class MainActivity : AppCompatActivity() {
             .setSource(this, modelResourceId)
             .build()
             .thenAccept { modelRenderable ->
-                addNodeToSceneRound(anchor, modelRenderable, spaceship)
+                addNodeToSceneRound(anchor, modelRenderable, model)
                 //util.eliminateDot()
             }.exceptionally {
                 Toast.makeText(this, "Error creating node: $it", Toast.LENGTH_LONG).show()

@@ -37,7 +37,7 @@
     file: 'sampledata/models/earth/earth_ball.obj',
     name: 'earth_ball',
     recenter: 'root',
-    scale: 0.005,
+    scale: 0.4f,
   },
   samplers: [
     {

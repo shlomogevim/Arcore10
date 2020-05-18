@@ -21,7 +21,7 @@ sealed class Models {
         override val degreesPerSecond: Float
             get() = 20f
         override val radius: Float
-            get() = 3f
+            get() = 5f
         override val height: Float
             get() = 1.0f
         override val rotationDegrees: Float
