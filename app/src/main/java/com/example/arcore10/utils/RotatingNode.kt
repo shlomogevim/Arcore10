@@ -38,12 +38,9 @@ class RotatingNode(
 
     private fun createObjectAnimator(): ObjectAnimator {
         val animationValues = arrayOf(
-            Quaternion.axisAngle(Vector3.up(), 90f),
-            Quaternion.axisAngle(Vector3.up(), 93f),
-            Quaternion.axisAngle(Vector3.up(), 90f)
-            /* Quaternion.axisAngle(Vector3.up(), 0f),
-                Quaternion.axisAngle(Vector3.up(), -180f),
-                Quaternion.axisAngle(Vector3.up(), -360f)*/
+            Quaternion.axisAngle(Vector3.up(), 0f),
+            Quaternion.axisAngle(Vector3.up(), -180f),
+            Quaternion.axisAngle(Vector3.up(), -360f)
         )
         return ObjectAnimator().apply {
             setObjectValues(*animationValues)

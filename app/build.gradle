@@ -18,23 +18,17 @@ sceneform.asset(
         'src/main/res/raw/earth_ball'
 )*/
 
-/*sceneform.asset(
-        'sampledata/models/shiny-fish/Fishka_2.fbx',
-        'default',
-        'sampledata/models/shiny-fish/Fishka_2.sfa',
-        'src/main/res/raw/fishka',
-        ['sampledata/models/shiny-fish/Fishka_2.fbx']
-)*/
 
 
 
+/*
 sceneform.asset(
         'sampledata/models/dancer/biomutantdance_motionplus0.fbx',
         'default',
         'sampledata/models/dancer/biomutantdance_motionplus0.sfa',
         'src/main/res/raw/biomutantdance_motionplus0',
         ['sampledata/models/dancer/biomutantdance_motionplus0.fbx']
-)
+)*/
 
 
 
